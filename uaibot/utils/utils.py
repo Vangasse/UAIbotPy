@@ -7,6 +7,7 @@ from scipy.linalg import null_space
 from httplib2 import *
 import sys
 import quadprog
+import torch
 
 import os
 if os.environ['CPP_SO_FOUND']=="1":
@@ -178,6 +179,91 @@ class Utils:
                          [sin(angle), cos(angle), 0, 0],
                          [0, 0, 1, 0],
                          [0, 0, 0, 1]])
+
+    @staticmethod
+    def trn_torch(vector):
+        """
+      Homogeneous transformation matrix that represents the displacement
+      of a vector using PyTorch.
+      
+      Parameters
+      ----------
+      vector : a 3D vector
+          The displacement vector.
+      
+      Returns
+      -------
+      htm : 4x4 torch.Tensor
+          The homogeneous transformation matrix.
+      """
+        v = torch.tensor(vector, dtype=torch.float32).view(3, 1)
+        return torch.tensor([[1, 0, 0, v[0, 0]],
+                             [0, 1, 0, v[1, 0]],
+                             [0, 0, 1, v[2, 0]],
+                             [0, 0, 0, 1]], dtype=torch.float32)
+
+    @staticmethod
+    def rotx_torch(angle):
+        """
+      Homogeneous transformation matrix that represents the rotation of an
+      angle in the 'x' axis using PyTorch.
+      
+      Parameters
+      ----------
+      angle: float
+          The angle of rotation, in radians.
+
+      Returns
+      -------
+      htm : 4x4 torch.Tensor
+          The homogeneous transformation matrix.
+      """
+        return torch.tensor([[1, 0, 0, 0],
+                             [0, torch.cos(angle), -torch.sin(angle), 0],
+                             [0, torch.sin(angle), torch.cos(angle), 0],
+                             [0, 0, 0, 1]], dtype=torch.float32)
+
+    @staticmethod
+    def roty_torch(angle):
+        """
+      Homogeneous transformation matrix that represents the rotation of an
+      angle in the 'y' axis using PyTorch.
+      
+      Parameters
+      ----------
+      angle: float
+          The angle of rotation, in radians.
+
+      Returns
+      -------
+      htm : 4x4 torch.Tensor
+          The homogeneous transformation matrix.
+      """
+        return torch.tensor([[torch.cos(angle), 0, torch.sin(angle), 0],
+                             [0, 1, 0, 0],
+                             [-torch.sin(angle), 0, torch.cos(angle), 0],
+                             [0, 0, 0, 1]], dtype=torch.float32)
+
+    @staticmethod
+    def rotz_torch(angle):
+        """
+      Homogeneous transformation matrix that represents the rotation of an
+      angle in the 'z' axis using PyTorch.
+      
+      Parameters
+      ----------
+      angle: float
+          The angle of rotation, in radians.
+
+      Returns
+      -------
+      htm : 4x4 torch.Tensor
+          The homogeneous transformation matrix.
+      """
+        return torch.tensor([[torch.cos(angle), -torch.sin(angle), 0, 0],
+                             [torch.sin(angle), torch.cos(angle), 0, 0],
+                             [0, 0, 1, 0],
+                             [0, 0, 0, 1]], dtype=torch.float32)
 
     @staticmethod
     def htm_rand(trn_min=[0.,0.,0.], trn_max = [1.,1.,1.], rot=np.pi/2):
