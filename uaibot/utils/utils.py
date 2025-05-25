@@ -266,6 +266,39 @@ class Utils:
                              [0, 0, 0, 1]], dtype=torch.float32)
 
     @staticmethod
+    def rotz_torch_multi(angles):
+        """
+        Batch homogeneous transformation matrix for rotation around the 'z' axis.
+        
+        Parameters
+        ----------
+        angles : torch.Tensor of shape (N,)
+            A 1D tensor containing N angles (in radians).
+
+        Returns
+        -------
+        htm_batch : torch.Tensor of shape (N, 4, 4)
+            A batch of homogeneous transformation matrices (one per angle).
+        """
+        N = angles.shape[0]  # Número de ângulos
+        
+        # Inicializa um tensor (N, 4, 4) preenchido com zeros
+        htm_batch = torch.zeros(N, 4, 4, dtype=torch.float32, device=angles.device)
+        
+        # Preenche os valores vetorizados
+        cos_theta = torch.cos(angles)
+        sin_theta = torch.sin(angles)
+        
+        htm_batch[:, 0, 0] = cos_theta   # cos(θ)
+        htm_batch[:, 0, 1] = -sin_theta  # -sin(θ)
+        htm_batch[:, 1, 0] = sin_theta   # sin(θ)
+        htm_batch[:, 1, 1] = cos_theta   # cos(θ)
+        htm_batch[:, 2, 2] = 1.0         # 1 (diagonal)
+        htm_batch[:, 3, 3] = 1.0         # 1 (diagonal)
+
+        return htm_batch
+
+    @staticmethod
     def htm_rand(trn_min=[0.,0.,0.], trn_max = [1.,1.,1.], rot=np.pi/2):
         """
       Returns a random homogeneous transformation matrix.
