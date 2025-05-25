@@ -132,6 +132,8 @@ def _fkm_gpu_multi(self, q, axis, htm):
 
     theta_tensor = torch.tensor([link.theta for link in self._links], dtype=torch.float32).unsqueeze(0).repeat(batch_size, 1)
     alpha_tensor = torch.tensor([link.alpha for link in self._links], dtype=torch.float32).unsqueeze(0).repeat(batch_size, 1)
+    a_tensor = torch.tensor([link.a for link in self._links], dtype=torch.float32).unsqueeze(0).repeat(batch_size, 1)
+    d_tensor = torch.tensor([link.d for link in self._links], dtype=torch.float32).unsqueeze(0).repeat(batch_size, 1)
 
     for i in range(n):
         if i == 0:
@@ -144,4 +146,21 @@ def _fkm_gpu_multi(self, q, axis, htm):
         else:
             htm_dh[:, i] = torch.bmm(htm_dh[:, i], Utils.rotz_torch_multi(theta_tensor[:, i]))
 
-    return None
+        if self.links[i].joint_type == 1:
+            # Cria vetores [0, 0, q_tensor[:, i]] em batch
+            translation_vectors = torch.zeros(batch_size, 3, dtype=torch.float32, device=q_tensor.device)
+            translation_vectors[:, 2] = q_tensor[:, i]
+            htm_dh[:, i] = torch.bmm(htm_dh[:, i], Utils.trn_torch_multi(translation_vectors))
+        else:
+            # Cria vetores [0, 0, d] em batch (d fixo por link)
+            translation_vectors = torch.zeros(batch_size, 3, dtype=torch.float32, device=q_tensor.device)
+            translation_vectors[:, 2] = d_tensor[:, i]
+            htm_dh[:, i] = torch.bmm(htm_dh[:, i], Utils.trn_torch_multi(translation_vectors))
+
+        htm_dh[:, i] = torch.bmm(htm_dh[:, i], Utils.rotx_torch_multi(alpha_tensor[:, i]))
+        # Cria vetores [a, 0, 0] em batch (a fixo por link)
+        translation_vectors = torch.zeros(batch_size, 3, dtype=torch.float32, device=q_tensor.device)
+        translation_vectors[:, 0] = a_tensor[:, i]
+        htm_dh[:, i] = torch.bmm(htm_dh[:, i], Utils.trn_torch_multi(translation_vectors))
+
+    return htm_dh[:, -1]

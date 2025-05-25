@@ -203,6 +203,31 @@ class Utils:
                              [0, 0, 0, 1]], dtype=torch.float32)
 
     @staticmethod
+    def trn_torch_multi(vectors):
+        """
+        Batch homogeneous transformation matrix for translation given a set of 3D vectors.
+
+        Parameters
+        ----------
+        vectors : torch.Tensor of shape (N, 3)
+            A batch of 3D displacement vectors.
+
+        Returns
+        -------
+        htm_batch : torch.Tensor of shape (N, 4, 4)
+            A batch of homogeneous transformation matrices (one per vector).
+        """
+        N = vectors.shape[0]  # Número de vetores
+        
+        # Cria um tensor (N, 4, 4) com a matriz identidade
+        htm_batch = torch.eye(4, dtype=torch.float32, device=vectors.device).unsqueeze(0).repeat(N, 1, 1)
+        
+        # Insere os componentes do vetor nas posições corretas
+        htm_batch[:, :3, 3] = vectors  # Preenche os elementos [tx, ty, tz]
+        
+        return htm_batch
+
+    @staticmethod
     def rotx_torch(angle):
         """
       Homogeneous transformation matrix that represents the rotation of an
@@ -264,6 +289,37 @@ class Utils:
                              [torch.sin(angle), torch.cos(angle), 0, 0],
                              [0, 0, 1, 0],
                              [0, 0, 0, 1]], dtype=torch.float32)
+
+    @staticmethod
+    def rotx_torch_multi(angles):
+        """
+        Batch homogeneous transformation matrix for rotation around the 'x' axis.
+        
+        Parameters
+        ----------
+        angles : torch.Tensor of shape (N,)
+            A 1D tensor containing N angles (in radians).
+
+        Returns
+        -------
+        htm_batch : torch.Tensor of shape (N, 4, 4)
+            A batch of homogeneous transformation matrices (one per angle).
+        """
+        N = angles.shape[0]  # Número de ângulos
+        
+        # Inicializa um tensor (N, 4, 4) com a matriz identidade
+        htm_batch = torch.eye(4, dtype=torch.float32, device=angles.device).unsqueeze(0).repeat(N, 1, 1)
+        
+        # Preenche os valores de rotação em X
+        cos_theta = torch.cos(angles)
+        sin_theta = torch.sin(angles)
+        
+        htm_batch[:, 1, 1] = cos_theta   # cos(θ) na posição (1,1)
+        htm_batch[:, 1, 2] = -sin_theta  # -sin(θ) na posição (1,2)
+        htm_batch[:, 2, 1] = sin_theta   # sin(θ) na posição (2,1)
+        htm_batch[:, 2, 2] = cos_theta   # cos(θ) na posição (2,2)
+        
+        return htm_batch
 
     @staticmethod
     def rotz_torch_multi(angles):
