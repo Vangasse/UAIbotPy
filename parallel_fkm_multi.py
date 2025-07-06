@@ -37,7 +37,7 @@ if __name__ == "__main__":
     print("\n" + "#" * 20)
     print("FKM - GPU (Parallel)")
     start_time = time.time()
-    gpu_results = robot.fkm(q=random_joint_values_matrix, mode='gpu_multi')
+    gpu_results = robot.fkm(q=random_joint_values_matrix, mode='gpu')
     end_time = time.time()
 
     total_time = end_time - start_time

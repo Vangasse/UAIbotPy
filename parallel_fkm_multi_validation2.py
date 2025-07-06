@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # Aquecimento da GPU
     print("Aquecendo a GPU...")
     for _ in range(10):
-        _ = robot.fkm(q=random_joint_values_matrix[:10], mode='gpu_multi')
+        _ = robot.fkm(q=random_joint_values_matrix[:10], mode='gpu')
 
     # Benchmark principal
     for run in range(runs):
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         # GPU
         torch.cuda.synchronize()
         gpu_start = time.perf_counter()
-        gpu_res = robot.fkm(q=random_joint_values_matrix, mode='gpu_multi')
+        gpu_res = robot.fkm(q=random_joint_values_matrix, mode='gpu')
         torch.cuda.synchronize()
         results['gpu_times'].append(time.perf_counter() - gpu_start)
         

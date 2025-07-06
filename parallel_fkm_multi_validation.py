@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Aquecimento da GPU (opcional, mas recomendado)
     print("Aquecendo a GPU...")
     for _ in range(warmup_runs):
-        _ = robot.fkm(q=random_joint_values_matrix[:10], mode='gpu_multi')
+        _ = robot.fkm(q=random_joint_values_matrix[:10], mode='gpu')
 
     # Modo CPU (serial)
     print("Processando FKM serial (CPU)...")
